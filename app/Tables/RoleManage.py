@@ -11,12 +11,13 @@ from app.framework_api import date_time
 from app.services import ModelBase, engine
 # <-元类
 
+
 class Role(ModelBase):
     __tablename__ = "t_roles"
     role_id = Column(Integer, primary_key=True)
     name = Column(String(length=30), unique=True)
     enable = Column(Integer)
-    cate_time = Column(DateTime, default=date_time())
+    cate_time = Column(String(length=50), default=date_time())
     area_set = relationship("RoleRoute",cascade="all, delete-orphan", backref='t_roles')
 
     def __init__(self, role_name, enable=0):
@@ -76,7 +77,7 @@ class Route(ModelBase):
 
 class RoleRoute(ModelBase):
     __tablename__ = "role_pk_route"
-    roles_id = Column(Integer, ForeignKey('t_roles.role_id'), primary_key=True)
+    role_id = Column(Integer, ForeignKey('t_roles.role_id'), primary_key=True)
     route_id = Column(Integer, ForeignKey('t_routes.route_id'), primary_key=True)
     route_name = Column(String(length=30))
     rule = Column(String(length=255))

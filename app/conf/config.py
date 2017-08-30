@@ -69,7 +69,7 @@ dbs = {
 # failures
 # ping
 mysql_pool_configs = {
-    "url": "mysql+pymysql://root:qwe1234567@10.10.51.30:3306/tiptop_dev?charset=utf8",
+    "url": "mysql+pymysql://root:qwe1234567@10.10.51.30:3306/tip?charset=utf8",
     "pool_timeout": 5
 
 }

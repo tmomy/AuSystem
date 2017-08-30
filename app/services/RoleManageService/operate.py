@@ -5,12 +5,12 @@
 @time: 2017/8/26 15:18
 """
 from sqlalchemy.orm import Session
-
+from sqlalchemy import update, desc
 from app.Tables.RoleManage import (RoleRoute, Role, Route)
 from app.conf import msg
 from app.untils import get_rule_set
-from .. import engine, handler_commit
-
+from .. import engine, handler_commit, err_logging, sys_logging
+import traceback
 session = Session(engine)
 
 
@@ -28,12 +28,14 @@ def db_role_init():
     routes = role_init()
     role_name = "admin"
     session.add_all(routes)
-    handler_commit(session.commit())
+    handler_commit(session)
     role = Role(role_name=role_name)
+    administrator = Role(role_name="administrator")
+    user = Role(role_name="user")
     for route in routes:
         role.area_set.append(RoleRoute(route))
-    session.add(role)
-    handler_commit(session.commit())
+    session.add_all([role, administrator, user])
+    handler_commit(session)
     return msg.SUCCESS
 
 
@@ -57,7 +59,7 @@ def db_role_update():
         # 新增的路由写入
         if rule not in rule_list:
             role_obj.area_set.append(RoleRoute(Route(rule, name, *func)))
-            handler_commit(session.commit())
+            handler_commit(session)
         rule_now.append(rule)
     # 不存在的路由进行删除
     over_set = set(rule_list) - set(rule_now)
@@ -67,24 +69,67 @@ def db_role_update():
     return msg.SUCCESS
 
 
-# 新增用户角色
-def db_role_add():
+# role add
+def db_role_add(role):
+    new_role = Role(role_name=role)
+    session.add(new_role)
+    result = handler_commit(session)
+    print result
+    return result
 
-    pass
+
+# role modify
+def db_role_modify(role_id,role_name,enable):
+    try:
+        session.query(Role).filter(Role.role_id == role_id).\
+            update({Role.name: role_name, Role.enable: enable}, synchronize_session=False)
+        return handler_commit(session)
+    except:
+        sys_logging.debug("mysql.err:{}".format(traceback.format_exc()))
+        return False
 
 
+@err_logging
+def db_role_del(role_id):
+    if role_id in [1, 2, 3]:
+        return False
+    result = _db_role_rule_delete(role_id=role_id)
+    return result
+
+
+@err_logging
+def db_role_search(role_id=None, page=1, limit=10):
+    offset = (page - 1) * limit
+    data = []
+    if not role_id:
+        result = session.query(Role).order_by(Role.role_id)
+        for each in result.offset(offset).limit(limit):
+            data.append(each.to_json())
+        total = result.count()
+    else:
+        result = session.query(Role).filter(Role.role_id==role_id).one()
+        data.append(result.to_json())
+        total = 1
+    return data, total
+
+
+# delete role or rule
 def _db_role_rule_delete(role_id=None, rule_id=None):
     if rule_id:
-        rule_del = session.query(Route).filter(Route.route_id == rule_id).one()
-        role_rule = session.query(RoleRoute).filter(RoleRoute.route_id == rule_id).one()
+        rule_del = session.query(Route).filter(Route.route_id == rule_id).all()
+        if not len(rule_del):
+            return False
+        role_rule = session.query(RoleRoute).filter(RoleRoute.route_id == rule_id).all()
         session.delete(rule_del)
-        session.delete(role_rule)
     else:
-        role_del = session.query(Role).filter(Role.route_id == role_id).one()
-        role_rule = session.query(RoleRoute).filter(RoleRoute.role_id == role_id).one()
+        role_del = session.query(Role).filter(Role.role_id == role_id).all()
+        if not len(role_del):
+            return False
+        role_rule = session.query(RoleRoute).filter(RoleRoute.role_id == role_id).all()
         session.delete(role_del)
-        session.delete(role_rule)
-    handler_commit(session.commit())
+    for each in role_rule:
+        session.delete(each)
+    return handler_commit(session)
 
 
 # 更新字段值
@@ -93,6 +138,5 @@ def _field_update(table, field, value=1):
         return msg.PARAMS_ERR
     setattr(table,field,value)
     return table
-
 
 

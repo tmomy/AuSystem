@@ -24,12 +24,13 @@ def person_register():
 @route("/hellos2", api="测试", methods=['GET', 'POST'])
 def person_register():
     params = get_params()
-    TableInit.create_table()
+    TableInit.create_all_table()
     return "helloworld"
 
 
 @route("/hellos5", api="测试", methods=['GET', 'POST'])
 def person_register():
     params = get_params()
+    TableInit.drop_all_table()
     return "helloworld"
 

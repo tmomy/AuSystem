@@ -4,9 +4,10 @@
 @author: WL
 @time: 2017/8/25 17:33
 """
-from app.conf.config import log
+from app.conf.config import log,web
 from app.untils.log_builder import build_log
 from sqlalchemy.ext.declarative import declarative_base
+from functools import wraps
 from app.mysql_db import db_pool
 import traceback
 
@@ -17,10 +18,23 @@ sys_logging = build_log(log)
 
 
 def handler_commit(fun):
+    try:
+        fun.commit()
+        return True
+    except:
+        fun.rollback()
+        sys_logging.debug("mysql.err:{}".format(traceback.format_exc()))
+        return False
+
+
+def err_logging(func):
+    @wraps(func)
+    def deco(*args, **kwargs):
         try:
-            result = fun()
+            result = func(*args, **kwargs)
             return result
-        except Exception as e:
-            sys_logging.debug("create pool err:{}".format(traceback.print_exc()))
+        except:
+            sys_logging.debug("mysql.query.one.err:{}".format(traceback.format_exc()))
             return False
 
+    return deco
