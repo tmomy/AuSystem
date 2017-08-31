@@ -5,7 +5,7 @@
 @time: 2017/8/25 17:36
 """
 # from ..RoleManageService import ModelBase, engine
-from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey)
+from sqlalchemy import (Column, Integer, String, PrimaryKeyConstraint, ForeignKey)
 from sqlalchemy.orm import relationship
 from app.framework_api import date_time
 from app.services import ModelBase, engine
@@ -18,7 +18,7 @@ class Role(ModelBase):
     name = Column(String(length=30), unique=True)
     enable = Column(Integer)
     cate_time = Column(String(length=50), default=date_time())
-    area_set = relationship("RoleRoute",cascade="all, delete-orphan", backref='t_roles')
+    area_set = relationship("RoleRoute",cascade="save-update, delete", backref='t_roles')
 
     def __init__(self, role_name, enable=0):
         self.name = role_name
@@ -77,15 +77,35 @@ class Route(ModelBase):
 
 class RoleRoute(ModelBase):
     __tablename__ = "role_pk_route"
+    id = Column(Integer, primary_key=True, autoincrement=True)
     role_id = Column(Integer, ForeignKey('t_roles.role_id'), primary_key=True)
     route_id = Column(Integer, ForeignKey('t_routes.route_id'), primary_key=True)
-    route_name = Column(String(length=30))
-    rule = Column(String(length=255))
+    add = Column(Integer, default=-1)
+    modify = Column(Integer, default=-1)
+    delete = Column(Integer, default=-1)
+    search = Column(Integer, default=-1)
 
     def __init__(self, route):
+        self.modify = route.modify
+        self.search = route.search
+        self.delete = route.delete
         self.route = route
-        self.rule = route.rule
-        self.route_name = route.name
+        self.add = route.add
+
+    def to_json(self):
+        return {
+            'id': self.id,
+            'route_id': self.route_id,
+            'role_id': self.role_id,
+            'rule': self.route.rule,
+            'name': self.route.name,
+            'role':self.role.name,
+            'add': self.add,
+            'modify': self.modify,
+            'delete': self.delete,
+            'search': self.search
+        }
     route = relationship(Route)
+    role = relationship(Role)
 
 

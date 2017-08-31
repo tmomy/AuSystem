@@ -92,7 +92,7 @@ log = {
     "name": "myapp",
     "level": "debug",
     "console": False,
-    "format": "%(asctime)s %(funcName)s:%(lineno)d %(filename)s - %(name)s %(levelname)s - %(message)s",
+    "format": "%(thread)d:%(asctime)s %(funcName)s:%(lineno)d %(filename)s - %(name)s %(levelname)s - %(message)s",
     "file": {
         "enable": True,
         "path": web["log_pix"] + "app\\logs\\myapp.log"

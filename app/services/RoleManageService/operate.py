@@ -5,7 +5,7 @@
 @time: 2017/8/26 15:18
 """
 from sqlalchemy.orm import Session
-from sqlalchemy import update, desc
+from sqlalchemy import update, desc, and_
 from app.Tables.RoleManage import (RoleRoute, Role, Route)
 from app.conf import msg
 from app.untils import get_rule_set
@@ -73,9 +73,7 @@ def db_role_update():
 def db_role_add(role):
     new_role = Role(role_name=role)
     session.add(new_role)
-    result = handler_commit(session)
-    print result
-    return result
+    return handler_commit(session)
 
 
 # role modify
@@ -86,15 +84,14 @@ def db_role_modify(role_id,role_name,enable):
         return handler_commit(session)
     except:
         sys_logging.debug("mysql.err:{}".format(traceback.format_exc()))
-        return False
+        return False, msg.ERROR(1, "编辑失败！")
 
 
 @err_logging
 def db_role_del(role_id):
     if role_id in [1, 2, 3]:
-        return False
-    result = _db_role_rule_delete(role_id=role_id)
-    return result
+        return False, msg.ERROR(1,"该角色不能删除！")
+    return _db_role_rule_delete(role_id=role_id)
 
 
 @err_logging
@@ -107,24 +104,79 @@ def db_role_search(role_id=None, page=1, limit=10):
             data.append(each.to_json())
         total = result.count()
     else:
-        result = session.query(Role).filter(Role.role_id==role_id).one()
+        result = session.query(Role).filter(Role.role_id == role_id).one()
         data.append(result.to_json())
         total = 1
     return data, total
 
 
+@err_logging
+def db_relationship_add(role_id, rule_list):
+    pending_role = session.query(Role).filter(Role.role_id == role_id).one_or_none()
+    if not pending_role:
+        return False, msg.ERROR(1, "角色不存在！")
+    for rule in pending_role.area_set:
+        if rule.route_id in rule_list:
+            return False, msg.ERROR(1, "权限已经拥有!")
+    for rule_id in rule_list:
+        rule = session.query(Route).filter(Route.route_id == rule_id).one_or_none()
+        if not rule:
+            return False, msg.ERROR(1, "输入权限不存在！")
+        new_rule = RoleRoute(rule)
+        pending_role.area_set.append(new_rule)
+    return handler_commit(session)
+
+
+@err_logging
+def db_relationship_del(id_list):
+    if not id_list:
+        return False, msg.ERROR(1, "输入为空!")
+    for rule_id in id_list:
+        print 111
+        del_rule = session.query(RoleRoute).filter(RoleRoute.id == rule_id).one_or_none()
+        print del_rule, 1
+        if not del_rule:
+            return False, msg.ERROR(1, "操作中有不存在的权限!")
+        session.delete(del_rule)
+    return handler_commit(session)
+
+
+@err_logging
+def db_relationship_search(role_id=None,route_id=None, page=1, limit=10):
+    offset = (page - 1) * limit
+    data = []
+    if role_id:
+        search_filter = RoleRoute.role_id == role_id
+    else:
+        search_filter = RoleRoute.route_id == route_id
+    search_rule = session.query(RoleRoute).filter(search_filter).order_by(RoleRoute.id)
+    total = search_rule.count()
+    if total:
+        for rule in search_rule.offset(offset).limit(limit):
+            data.append(rule.to_json())
+    return total, data
+
+@err_logging
+def db_relationship_edit():
+    pass
+
+
+
+
+
+
 # delete role or rule
 def _db_role_rule_delete(role_id=None, rule_id=None):
     if rule_id:
-        rule_del = session.query(Route).filter(Route.route_id == rule_id).all()
-        if not len(rule_del):
-            return False
+        rule_del = session.query(Route).filter(Route.route_id == rule_id).one_or_none()
+        if not rule_del:
+            return False, msg.ERROR(1, "该权限不存在！")
         role_rule = session.query(RoleRoute).filter(RoleRoute.route_id == rule_id).all()
         session.delete(rule_del)
     else:
-        role_del = session.query(Role).filter(Role.role_id == role_id).all()
-        if not len(role_del):
-            return False
+        role_del = session.query(Role).filter(Role.role_id == role_id).one_or_none()
+        if not role_del:
+            return False, msg.ERROR(1, "该角色不存在！")
         role_rule = session.query(RoleRoute).filter(RoleRoute.role_id == role_id).all()
         session.delete(role_del)
     for each in role_rule:

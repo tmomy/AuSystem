@@ -12,3 +12,7 @@ role_edit_api = operate.db_role_modify
 role_del_api = operate.db_role_del
 role_search_api = operate.db_role_search
 
+relationship_add_api = operate.db_relationship_add
+relationship_del_api = operate.db_relationship_del
+relationship_search_api = operate.db_relationship_search
+

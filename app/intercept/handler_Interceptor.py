@@ -9,6 +9,8 @@ from framework.decorators import rules
 from flask import request,make_response, g
 from app.untils.log_builder import build_log
 from app.conf.config import log
+import threading
+_ident = threading._get_ident()
 
 
 logging = build_log(log_config=log)
@@ -16,6 +18,7 @@ logging = build_log(log_config=log)
 
 @app.before_request
 def context_handler():
+    print _ident
     setattr(request, 'rule_set', rules)
     pass
 
