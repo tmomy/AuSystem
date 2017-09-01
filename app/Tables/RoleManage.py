@@ -99,7 +99,7 @@ class RoleRoute(ModelBase):
             'role_id': self.role_id,
             'rule': self.route.rule,
             'name': self.route.name,
-            'role':self.role.name,
+            'role': self.role.name,
             'add': self.add,
             'modify': self.modify,
             'delete': self.delete,

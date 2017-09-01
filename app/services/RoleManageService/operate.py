@@ -5,68 +5,11 @@
 @time: 2017/8/26 15:18
 """
 from sqlalchemy.orm import Session
-from sqlalchemy import update, desc, and_
 from app.Tables.RoleManage import (RoleRoute, Role, Route)
-from app.conf import msg
-from app.untils import get_rule_set
+from app.conf import msg, config
 from .. import engine, handler_commit, err_logging, sys_logging
 import traceback
 session = Session(engine)
-
-
-def role_init():
-    route_list = []
-    rules = get_rule_set()
-    for each in rules:
-        role, name, rule, func = each
-        route = Route(rule, name, *func)
-        route_list.append(route)
-    return route_list
-
-
-def db_role_init():
-    routes = role_init()
-    role_name = "admin"
-    session.add_all(routes)
-    handler_commit(session)
-    role = Role(role_name=role_name)
-    administrator = Role(role_name="administrator")
-    user = Role(role_name="user")
-    for route in routes:
-        role.area_set.append(RoleRoute(route))
-    session.add_all([role, administrator, user])
-    handler_commit(session)
-    return msg.SUCCESS
-
-
-def db_role_update():
-    # 查出已存在的路由
-    role_obj = session.query(Role).filter(Role.role_id == 1).one()
-    route_list = []
-    rule_list = []
-    for i in role_obj.area_set:
-        route_set = {
-            'rule': i.rule,
-            'id': i.route_id
-        }
-        rule_list.append(i.rule)
-        route_list.append(route_set)
-    # 对当前路由的处理
-    rule_now = []
-    rules = get_rule_set()
-    for each in rules:
-        role, name, rule, func = each
-        # 新增的路由写入
-        if rule not in rule_list:
-            role_obj.area_set.append(RoleRoute(Route(rule, name, *func)))
-            handler_commit(session)
-        rule_now.append(rule)
-    # 不存在的路由进行删除
-    over_set = set(rule_list) - set(rule_now)
-    if len(over_set):
-        for de in list(over_set):
-            [_db_role_rule_delete(rule_id=s.get('id')) for s in route_list if s.get('rule') == de]
-    return msg.SUCCESS
 
 
 # role add
@@ -91,7 +34,7 @@ def db_role_modify(role_id,role_name,enable):
 def db_role_del(role_id):
     if role_id in [1, 2, 3]:
         return False, msg.ERROR(1,"该角色不能删除！")
-    return _db_role_rule_delete(role_id=role_id)
+    return db_role_rule_delete(role_id=role_id)
 
 
 @err_logging
@@ -132,9 +75,7 @@ def db_relationship_del(id_list):
     if not id_list:
         return False, msg.ERROR(1, "输入为空!")
     for rule_id in id_list:
-        print 111
         del_rule = session.query(RoleRoute).filter(RoleRoute.id == rule_id).one_or_none()
-        print del_rule, 1
         if not del_rule:
             return False, msg.ERROR(1, "操作中有不存在的权限!")
         session.delete(del_rule)
@@ -156,17 +97,72 @@ def db_relationship_search(role_id=None,route_id=None, page=1, limit=10):
             data.append(rule.to_json())
     return total, data
 
+
 @err_logging
-def db_relationship_edit():
-    pass
+def db_relationship_edit(rule_id, edit_info):
+    rel_ship = session.query(RoleRoute).filter(RoleRoute.id == rule_id).one_or_none()
+    re_bool = True
+    re_msg = msg.SUCCESS
+    if not rel_ship:
+        return False, msg.ERROR(1, "系统不存在该权限！")
+    rel_info = rel_ship.to_json()
+    for field, value in edit_info.items():
+        if value not in [0,1]:
+            return False, msg.ERROR(1, "输入超出限定范围！")
+        if rel_info[field] == 1:
+            re_bool = True
+            re_msg = msg.ERROR(0,"该权限已被系统设定为禁用，当前操作可能无效！")
+        edit_result = _field_update(rel_ship, field,value)
+        if not edit_result:
+            re_bool = False
+            re_msg = msg.ERROR(1, "输入字段不存在！")
+            return re_bool, re_msg
+    session.flush()
+    handler_commit(session)
+    return re_bool, re_msg
 
 
+def db_route_search(route_id, role_id, page=1, limit=10):
+    offset = (page - 1) * limit
+    data = []
+    total = 0
+    if route_id:
+        search_route = session.query(Route).filter(Route.route_id == route_id).one_or_none()
+        if search_route:
+            total = 1
+            data.append(search_route.to_json())
+    else:
+        if role_id:
+            search_role = session.query(RoleRoute).filter(RoleRoute.role_id == role_id).all()
+            if not len(search_role):
+                return False, msg.ERROR(1,"角色不存在！")
+            ids = [_id.route_id for _id in search_role]
+        else:
+            ids = []
+        search_route = session.query(Route).filter(~Route.route_id.in_(ids)).order_by(Route.route_id)
+        total = search_route.count()
+        print total
+        for each in search_route.offset(offset).limit(limit):
+            data.append(each.to_json())
+    return total, data
 
 
+@err_logging
+def db_route_edit(route_id, edit_info):
+    search_route = session.query(Route).filter(Route.route_id == route_id).one_or_none()
+    if not search_route:
+        return False, msg.ERROR(1, "该路由不存在！")
+    for field, value in edit_info.items():
+        if field not in ["name"] and value not in [0, 1]:
+                return False, msg.ERROR(1, "输入超出限定范围！")
+        edit_result = _field_update(search_route,field,value)
+        if not edit_result:
+            return False, msg.ERROR(1,"输入字段不存在！")
+    return handler_commit(session)
 
 
 # delete role or rule
-def _db_role_rule_delete(role_id=None, rule_id=None):
+def db_role_rule_delete(role_id=None, rule_id=None):
     if rule_id:
         rule_del = session.query(Route).filter(Route.route_id == rule_id).one_or_none()
         if not rule_del:
@@ -187,7 +183,7 @@ def _db_role_rule_delete(role_id=None, rule_id=None):
 # 更新字段值
 def _field_update(table, field, value=1):
     if not hasattr(table, field):
-        return msg.PARAMS_ERR
+        return False
     setattr(table,field,value)
     return table
 

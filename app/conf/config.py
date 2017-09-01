@@ -21,8 +21,10 @@ web = {
     "url_pre": "/api/tiptop",
     "api_version": ["v1"],
     "ip": "0.0.0.0",
+    "enable_root": True,
     "role": "admin",
     "opr": ["add","modify","delete","search"],
+    "rule_redis_pix": "sys_rule_id_",
     "port": 1111,
     "session_timeout": 60 * 60 * 24 * 30,
     "push_time":60 * 30,
@@ -53,7 +55,7 @@ dbs = {
         "pool_size": 5,  # 0表示不使用连接池 最大连接数
         "user_name": "",
         "password": "",
-        "db_name": "greenDB"
+        "db_name": "tiptop"
     }
 }
 
@@ -108,11 +110,11 @@ log = {
 sqltime_log_config = {
     "name": "sqltime",
     "level": "debug",
-    "console": False,
+    "console": True,
     "format": "%(asctime)s %(funcName)s:%(lineno)d %(filename)s - %(name)s %(levelname)s - %(message)s",
     "file": {
         "enable": True,
-        "path": web["log_pix"] + "app\\logs\\sqltime.log"
+        "path": web["log_pix"] + "app\\logs\\sql_time.log"
     },
     "syslog": {
         "enable": False,

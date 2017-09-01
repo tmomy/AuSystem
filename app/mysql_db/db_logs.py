@@ -12,14 +12,14 @@ import time
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
-pool_logger = build_log(pool_log_config)
 sqltime_logger = build_log(sqltime_log_config)
+pool_logger = build_log(pool_log_config)
 
 
 @listens_for(Engine, "before_cursor_execute")
 def before_cursor_execute(conn, cursor, statement,
                          parameters, context, executemany):
-    conn.info.setdefault('query_start_time',time.time())
+    conn.info.setdefault('query_start_time', time.time())
     # sqltime_logger.info("Start Query: {},Query Parameters: {}".format(str(statement), str(parameters)))
 
 
@@ -27,7 +27,8 @@ def before_cursor_execute(conn, cursor, statement,
 def after_cursor_execute(conn, cursor, statement,
                          parameters, context, executemany):
     total = time.time() - conn.info['query_start_time']
-    sqltime_logger.debug("Start Query: {},Query Parameters: {},Query Complete!Total Time:{}".
+    print total
+    sqltime_logger.info("Start Query: {},Query Parameters: {},Query Complete!Total Time:{}".
                          format(str(statement), str(parameters), total))
 
 

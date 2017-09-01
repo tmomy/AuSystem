@@ -13,7 +13,7 @@ from app.services import ModelBase
 class Order(ModelBase):
     __tablename__ = "order"
 
-    order_id = Column(Integer, primary_key=True)
+    order_id = Column(Integer, primary_key=True, autoincrement=True)
     order_num = Column(String(length=30), primary_key=True, unique=True, nullable=False)
     order_status = Column(Integer, default=0)         # 0/1/2/3/4 待发货，已发货，已收货，拒收货，交易关闭
     order_logistics_company = Column(String(length=30))

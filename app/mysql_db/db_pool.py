@@ -15,7 +15,7 @@ sys_logging = build_log(log)
 def engine():
     db_pool = None
     try:
-        db_pool = create_engine(mysql_pool_configs['url'], poolclass=QueuePool,echo=True)
+        db_pool = create_engine(mysql_pool_configs['url'], poolclass=QueuePool)
     except exc.OperationalError as e:
         sys_logging.debug("create pool err:", e)
     return db_pool
