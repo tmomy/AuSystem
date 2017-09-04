@@ -7,14 +7,14 @@
 from sqlalchemy.orm import Session
 from app.Tables.RoleManage import (RoleRoute, Role, Route)
 from app.conf import msg, config
-from .. import engine, handler_commit, err_logging, sys_logging
+from .. import (engine, handler_commit, err_logging, sys_logging, field_update)
 import traceback
 session = Session(engine)
 
 
 # role add
-def db_role_add(role):
-    new_role = Role(role_name=role)
+def db_role_add(role, enable):
+    new_role = Role(role_name=role, enable=enable)
     session.add(new_role)
     return handler_commit(session)
 
@@ -47,7 +47,7 @@ def db_role_search(role_id=None, page=1, limit=10):
             data.append(each.to_json())
         total = result.count()
     else:
-        result = session.query(Role).filter(Role.role_id == role_id).one()
+        result = session.query(Role).filter(Role.role_id == role_id).one_or_none()
         data.append(result.to_json())
         total = 1
     return data, total
@@ -112,7 +112,7 @@ def db_relationship_edit(rule_id, edit_info):
         if rel_info[field] == 1:
             re_bool = True
             re_msg = msg.ERROR(0,"该权限已被系统设定为禁用，当前操作可能无效！")
-        edit_result = _field_update(rel_ship, field,value)
+        edit_result = field_update(rel_ship, field,value)
         if not edit_result:
             re_bool = False
             re_msg = msg.ERROR(1, "输入字段不存在！")
@@ -155,7 +155,7 @@ def db_route_edit(route_id, edit_info):
     for field, value in edit_info.items():
         if field not in ["name"] and value not in [0, 1]:
                 return False, msg.ERROR(1, "输入超出限定范围！")
-        edit_result = _field_update(search_route,field,value)
+        edit_result = field_update(search_route,field,value)
         if not edit_result:
             return False, msg.ERROR(1,"输入字段不存在！")
     return handler_commit(session)
@@ -180,11 +180,5 @@ def db_role_rule_delete(role_id=None, rule_id=None):
     return handler_commit(session)
 
 
-# 更新字段值
-def _field_update(table, field, value=1):
-    if not hasattr(table, field):
-        return False
-    setattr(table,field,value)
-    return table
 
 

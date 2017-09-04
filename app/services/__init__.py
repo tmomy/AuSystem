@@ -41,3 +41,12 @@ def err_logging(func):
             return False, msg.ERROR(_idnt, "操作失败！")
 
     return deco
+
+
+# 更新字段值
+def field_update(table, field, value=1):
+    if not hasattr(table, field):
+        return False
+    setattr(table,field,value)
+    return table
+

@@ -98,14 +98,12 @@ class SKUMapAttr(ModelBase):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     sku_id = Column(Integer, ForeignKey('sku.sku_id', ondelete='CASCADE', onupdate='CASCADE'))
-    attr_id = Column(Integer, ForeignKey('attr_category.id', ondelete='CASCADE', onupdate='CASCADE'))
     attr_name = Column(String(length=50))
     attr_value = Column(String(length=50))
     create_time = Column(DateTime, default=datetime.now())
 
-    def __init__(self, sku_id, attr_id, attr_name, attr_value,  create_time=datetime.now()):
+    def __init__(self, sku_id, attr_name, attr_value,  create_time=datetime.now()):
         self.sku_id = sku_id
-        self.attr_id = attr_id
         self.attr_name = attr_name
         self.attr_value = attr_value
         self.create_time = create_time
@@ -114,7 +112,6 @@ class SKUMapAttr(ModelBase):
         return {
             'id': self.id,
             'sku_id': self.sku_id,
-            'attr_id': self.attr_id,
             'attr_name': self.attr_name,
             'attr_value': self.attr_value,
             'pic_url': self.pic_url,
@@ -122,8 +119,7 @@ class SKUMapAttr(ModelBase):
         }
 
     def __repr__(self):
-        return "<id={},sku_id={},attr_id={},attr_name={},attr_value={},create_time={}>".format(self.id, self.sku_id,
-                                                                                               self.attr_id,
+        return "<id={},sku_id={},attr_name={},attr_value={},create_time={}>".format(self.id, self.sku_id,
                                                                                           self.attr_name, self.attr_value,
                                                                                           self.create_time)
 

@@ -15,7 +15,7 @@ def role_manage():
     opr = params['opr']
     data = params['data']
     if opr == "add":
-        re_bool, resp = RoleService.role_create_api(data['role_name'])
+        re_bool, resp = RoleService.role_create_api(data['role_name'], enable=data['enable'])
         if re_bool:
             return build_ret(success=True,msg="创建成功")
         else:
@@ -38,7 +38,10 @@ def role_manage():
         if not role_id:
             role_id = None
         result, total = RoleService.role_search_api(role_id, page, limit)
-        return build_ret(success=True, total=total, data=result)
+        if result is not False:
+            return build_ret(success=True, total=total, data=result)
+        else:
+            return get_ret(total)
 
 
 @route("/admin/role/relationship", api="角色权限", methods=['GET', 'POST'])

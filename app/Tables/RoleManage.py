@@ -4,11 +4,10 @@
 @author: WL
 @time: 2017/8/25 17:36
 """
-# from ..RoleManageService import ModelBase, engine
-from sqlalchemy import (Column, Integer, String, PrimaryKeyConstraint, ForeignKey)
+from sqlalchemy import (Column, Integer, String, ForeignKey)
 from sqlalchemy.orm import relationship
 from app.framework_api import date_time
-from app.services import ModelBase, engine
+from app.services import ModelBase
 # <-元类
 
 
@@ -17,7 +16,7 @@ class Role(ModelBase):
     role_id = Column(Integer, primary_key=True)
     name = Column(String(length=30), unique=True)
     enable = Column(Integer)
-    cate_time = Column(String(length=50), default=date_time())
+    create_time = Column(String(length=50), default=date_time())
     area_set = relationship("RoleRoute",cascade="save-update, delete", backref='t_roles')
 
     def __init__(self, role_name, enable=0):
@@ -29,7 +28,7 @@ class Role(ModelBase):
             'id': self.role_id,
             'name': self.name,
             'enable': self.enable,
-            'cate_time': self.cate_time
+            'create_time': self.create_time
         }
 
     def __repr__(self):
