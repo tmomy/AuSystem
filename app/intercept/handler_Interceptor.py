@@ -23,7 +23,7 @@ def context_handler():
     redis_key = web['rule_redis_pix'] + "1"
     if request.path == "/api/tiptop/v1/admin/system/role":
         return make_response("12344",404)
-    rule_dict = redis_service.get(redis_key)
+    # rule_dict = redis_service.get(redis_key)
     setattr(request, 'rule_set', rules)
     pass
 
