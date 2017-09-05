@@ -50,6 +50,7 @@ def db_role_search(role_id=None, page=1, limit=10):
         result = session.query(Role).filter(Role.role_id == role_id).one_or_none()
         data.append(result.to_json())
         total = 1
+    handler_commit(session)
     return data, total
 
 
@@ -95,6 +96,7 @@ def db_relationship_search(role_id=None,route_id=None, page=1, limit=10):
     if total:
         for rule in search_rule.offset(offset).limit(limit):
             data.append(rule.to_json())
+    handler_commit(session)
     return total, data
 
 
@@ -141,9 +143,9 @@ def db_route_search(route_id, role_id, page=1, limit=10):
             ids = []
         search_route = session.query(Route).filter(~Route.route_id.in_(ids)).order_by(Route.route_id)
         total = search_route.count()
-        print total
         for each in search_route.offset(offset).limit(limit):
             data.append(each.to_json())
+    handler_commit(session)
     return total, data
 
 

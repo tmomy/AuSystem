@@ -14,11 +14,11 @@ from RoleManage import Role
 
 class Administrator(ModelBase):
     __tablename__ = "administrator"
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     account = Column(String(length=30), unique=True)
     password = Column(String(length=128), nullable=False)
     enable = Column(Integer)
-    cate_time = Column(String(length=50), default=date_time())
+    create_time = Column(String(length=50), default=date_time())
     role_type = Column(Integer, ForeignKey('t_roles.role_id'), primary_key=True)
     role = relationship(Role)
 
@@ -36,7 +36,7 @@ class Administrator(ModelBase):
             'role_type': self.role_type,
             'role': self.role.name,
             'enable': self.enable,
-            'cate_time': self.cate_time
+            'create_time': self.create_time
         }
 
     def __repr__(self):

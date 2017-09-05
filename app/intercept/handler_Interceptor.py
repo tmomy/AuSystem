@@ -31,9 +31,7 @@ def context_handler():
 @app.after_request
 def response_handler(response):
     redis_key = web['rule_redis_pix'] + "1"
-    print redis_key
     rule_dict = redis_service.get(redis_key)
-    print rule_dict
     logging.info("response is [{}]".format(response.data))
     return response
 

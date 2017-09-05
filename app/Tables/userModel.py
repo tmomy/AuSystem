@@ -19,23 +19,23 @@ class User(ModelBase):
 
     user_id = Column(Integer, primary_key=True, unique=True, autoincrement=True)
     login_name = Column(String(length=30), unique=True, nullable=False)
-    login_pass = Column(String(length=128))
+    login_pass = Column(String(length=128), default="")
     rest_day = Column(Integer, default=0)
     role_type = Column(Integer)
     enable = Column(Integer,default=0)
     user_integral = Column(Integer, default=0)
-    name = Column(String(length=30))
-    nick_name = Column(String(length=30))
-    sex = Column(String(length=30))
-    birthday = Column(String(length=30))
-    address_province = Column(String(length=30))
-    address_city = Column(String(length=30))
-    tel = Column(String(length=30))
-    e_mail = Column(String(length=30))
+    name = Column(String(length=30), default="")
+    nick_name = Column(String(length=30), default="")
+    sex = Column(String(length=30), default="")
+    birthday = Column(String(length=30), default="")
+    address_province = Column(String(length=30), default="")
+    address_city = Column(String(length=30), default="")
+    tel = Column(String(length=30), default="")
+    e_mail = Column(String(length=30), default="")
     effective_time = Column(Date, nullable=False)  # 生效时间
     register_time = Column(String(length=50), default=date_time())
 
-    def __init__(self, login_name,role_type, rest_day, user_integral, effective_time):
+    def __init__(self, login_name=None,role_type=None, rest_day=0, user_integral=0, effective_time=0):
         self.login_name = login_name
         self.rest_day = rest_day
         self.role_type = role_type
@@ -45,8 +45,10 @@ class User(ModelBase):
 
     def to_json(self):
         return {
+            'user_id': self.user_id,
             'login_name': self.login_name,
             'rest_day': self.rest_day,
+            "enable": self.enable,
             'user_integral': self.user_integral,
             'name': self.name,
             'nick_name': self.nick_name,
