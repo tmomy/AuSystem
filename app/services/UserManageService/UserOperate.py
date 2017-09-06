@@ -84,7 +84,6 @@ def account_del(user_id):
         return False, msg.ERROR(1, "用户不存在！")
 
 
-
 @err_logging
 def account_address_add(address_info):
     user_id = address_info.pop('user_id')

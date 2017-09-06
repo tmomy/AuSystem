@@ -13,7 +13,7 @@ from app.services import ModelBase
 
 class Role(ModelBase):
     __tablename__ = "t_roles"
-    role_id = Column(Integer, primary_key=True)
+    role_id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(length=30), unique=True)
     enable = Column(Integer)
     create_time = Column(String(length=50), default=date_time())
@@ -37,7 +37,7 @@ class Role(ModelBase):
 
 class Route(ModelBase):
     __tablename__ = "t_routes"
-    route_id = Column(Integer, primary_key=True)
+    route_id = Column(Integer, primary_key=True, autoincrement=True)
     rule = Column(String(length=255), unique=True)
     name = Column(String(length=30))
     add = Column(Integer, default=-1)
@@ -45,16 +45,16 @@ class Route(ModelBase):
     delete = Column(Integer, default=-1)
     search = Column(Integer, default=-1)
 
-    def __init__(self, rule, name, *args):
+    def __init__(self, rule, name, opr):
         self.rule = rule
         self.name = name
-        if "add" in args:
+        if "add" in opr:
             self.add = 0
-        if "modify" in args:
+        if "modify" in opr:
             self.modify = 0
-        if "delete" in args:
+        if "delete" in opr:
             self.delete = 0
-        if "search" in args:
+        if "search" in opr:
             self.search = 0
 
     def to_json(self):

@@ -84,9 +84,18 @@ def db_relationship_del(id_list):
 
 
 @err_logging
-def db_relationship_search(role_id=None,route_id=None, page=1, limit=10):
+def db_relationship_search(rule_id=None, role_id=None,route_id=None, page=1, limit=10):
     offset = (page - 1) * limit
     data = []
+    if rule_id:
+        search_rule = session.query(RoleRoute).filter(RoleRoute.id == rule_id).one_or_none()
+        if search_rule:
+            total = 1
+            data.append(search_rule.to_json())
+        else:
+            total = 0
+        handler_commit(session)
+        return total, data
     if role_id:
         search_filter = RoleRoute.role_id == role_id
     else:
@@ -137,7 +146,8 @@ def db_route_search(route_id, role_id, page=1, limit=10):
         if role_id:
             search_role = session.query(RoleRoute).filter(RoleRoute.role_id == role_id).all()
             if not len(search_role):
-                return False, msg.ERROR(1,"角色不存在！")
+                ids = []
+                # return False, msg.ERROR(1,"角色不存在！")
             ids = [_id.route_id for _id in search_role]
         else:
             ids = []

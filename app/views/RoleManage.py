@@ -59,11 +59,12 @@ def relationship_manage():
         _, msg = RoleService.relationship_del_api(id_list=ids)
         return get_ret(msg)
     elif opr == "search":
+        rule_id = data['rule_id']
         role_id = data['role_id']
         route_id = data['route_id']
-        total, result = RoleService.relationship_search_api(role_id=role_id, route_id=route_id,
+        total, result = RoleService.relationship_search_api(rule_id=rule_id, role_id=role_id, route_id=route_id,
                                                             page=data['page'],limit=data['limit'])
-        if total:
+        if total is not False:
             return build_ret(success=True, total=total, data=result)
         else:
             return get_ret(result)

@@ -99,6 +99,6 @@ def _role_init():
     rules = get_rule_set()
     for each in rules:
         role, name, rule, func = each
-        route = Route(rule, name, *func)
+        route = Route(rule, name, func)
         route_list.append(route)
     return route_list

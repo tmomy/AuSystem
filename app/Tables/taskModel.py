@@ -24,7 +24,7 @@ class Task(ModelBase):
     task_create_time = Column(DateTime, default=date_time())
     task_do_time = Column(DateTime, default=date_time())
 
-    # user_id = Column(Integer, ForeignKey('user.user_id'))
+    user_id = Column(Integer, ForeignKey('user.user_id'))
 
 
 
@@ -32,7 +32,7 @@ class Task(ModelBase):
         self.task_num = task_num
         # self.task_type = task_type
         self.task_do_time = task_do_time
-        # self.user_id = user_id
+        self.user_id = user_id
         self.task_create_time = date_time()
 
     def to_json(self):
@@ -40,7 +40,7 @@ class Task(ModelBase):
             'task_id': self.task_id,
             'task_num': self.task_num,
             # 'task_type': self.task_type,
-            # 'user_id': self.user_id,
+            'user_id': self.user_id,
             'task_do_time': str(self.task_do_time),
             'task_create_time': str(self.task_create_time)
         }
