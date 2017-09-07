@@ -68,12 +68,9 @@ def sys_enable_rule():
     if not len(roles):
         return False, msg.ERROR(1, "数据库无管理员数据！")
     for role in roles:
-        role_dict = role.to_json()
-        re_role = _rule_collect(role,role_dict)
-        print role.role_id
-        print re_role
+        role_dict = {}
+        re_role = _rule_collect(role, role_dict)
         redis_key = config.web['rule_redis_pix'] + str(role.role_id)
-        print redis_key
         redis_service.set(redis_key, json.dumps(re_role))
     return True, msg.SUCCESS
 

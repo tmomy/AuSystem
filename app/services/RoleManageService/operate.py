@@ -6,7 +6,7 @@
 """
 from sqlalchemy.orm import Session
 from app.Tables.RoleManage import (RoleRoute, Role, Route)
-from app.conf import msg, config
+from app.conf import msg
 from .. import (engine, handler_commit, err_logging, sys_logging, field_update)
 import traceback
 session = Session(engine)

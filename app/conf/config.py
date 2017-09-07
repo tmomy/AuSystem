@@ -161,7 +161,19 @@ R_SMS = {
     "redis_timeout": 60*60
 }
 
-
+# redis 各模块存储前缀
+red_pre = {
+    # 用户激活码(code -> email)
+    "code": "c_a_",
+    # 用户对应的平台的ssid(email + platform + placeholder -> ssid )
+    "acc_plat_ssid": "a_pp_s_",
+    # 账户详细信息(ssid -> account)
+    "ssid_acc": "s_a_",
+    # 验证码（uuid -> captcha）
+    "captcha": "u_cp_",
+    # 用户密码输入错误次数统计（email -> counts）
+    "acc_login_err": "e_c_"
+}
 
 
 
