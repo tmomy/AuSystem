@@ -18,7 +18,7 @@ class Administrator(ModelBase):
     account = Column(String(length=30), unique=True)
     password = Column(String(length=128), nullable=False)
     enable = Column(Integer)
-    create_time = Column(String(length=50), default=date_time())
+    create_time = Column(String(length=50))
     role_type = Column(Integer, ForeignKey('t_roles.role_id'), primary_key=True)
     role = relationship(Role)
 
@@ -27,6 +27,7 @@ class Administrator(ModelBase):
         self.password = password
         self.role_type = role_type
         self.enable = enable
+        self.create_time = date_time()
 
     def to_json(self):
         return {

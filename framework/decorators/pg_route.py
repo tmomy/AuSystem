@@ -10,11 +10,12 @@ from app.conf import web
 from framework.flask import app
 
 rules = []
+login_list = []
 
 
 # route装饰器
 # 处理app.route装饰的方法名称相同的情况
-def route(rule, api, role=web['role'], opr=web['opr'], **options):
+def route(rule, api, role=web['role'], opr=web['opr'], type=0, **options):
     def wrapper(func):
         options['endpoint'] = rule
         # 处理多版本api
@@ -24,6 +25,8 @@ def route(rule, api, role=web['role'], opr=web['opr'], **options):
             if not checklist(opr):
                 raise ValueError('opr should be in {}.'.format(web['opr']))
             for rl in make_rule(web['url_pre'], web['api_version'], rule):
+                if type:
+                    login_list.append(rl)
                 rules.append((role, api, rl, opr))
                 app.route(rl, **options)(func)
             return wrapper

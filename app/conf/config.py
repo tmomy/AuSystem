@@ -21,7 +21,8 @@ web = {
     "url_pre": "/api/tiptop",
     "api_version": ["v1"],
     "ip": "0.0.0.0",
-    "enable_root": True,
+    "enable_rule": False,
+    "enable_admin": True,
     "role": "admin",
     "opr": ["add","modify","delete","search"],
     "rule_redis_pix": "sys_rule_id_",
@@ -35,7 +36,11 @@ web = {
     "pwd_err_freeze": 8,
     "account_freeze_time": 60*10,
     "debug": True,
-    "frontend_port": 8899
+    "frontend_port": 8899,
+    "upload_path": "./app/static_file/uploads/",
+    "pic_pix": "/static_file/",
+    # 开关延期时间
+    "switch_delay_time": 2
 }
 
 dbs = {
@@ -59,17 +64,6 @@ dbs = {
     }
 }
 
-# creator
-# mincached
-# maxcached
-# maxshared
-# maxconnections
-# blocking
-# maxusage
-# setsession
-# reset
-# failures
-# ping
 mysql_pool_configs = {
     "url": "mysql+pymysql://root:qwe1234567@10.10.51.30:3306/tip?charset=utf8",
     "pool_timeout": 5
@@ -163,6 +157,8 @@ R_SMS = {
 
 # redis 各模块存储前缀
 red_pre = {
+    # 修改绑定手机号验证码
+    "sms_lock_pix": "tel_pix_",
     # 用户激活码(code -> email)
     "code": "c_a_",
     # 用户对应的平台的ssid(email + platform + placeholder -> ssid )

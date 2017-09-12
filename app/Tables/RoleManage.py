@@ -46,16 +46,17 @@ class Route(ModelBase):
     search = Column(Integer, default=-1)
 
     def __init__(self, rule, name, opr):
+        status = 1
         self.rule = rule
         self.name = name
         if "add" in opr:
-            self.add = 0
+            self.add = status
         if "modify" in opr:
-            self.modify = 0
+            self.modify = status
         if "delete" in opr:
-            self.delete = 0
+            self.delete = status
         if "search" in opr:
-            self.search = 0
+            self.search = status
 
     def to_json(self):
         return {

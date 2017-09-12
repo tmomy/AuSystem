@@ -20,7 +20,7 @@ class Address(ModelBase):
     tag = Column(String(length=30), unique=True)
     detail = Column(String(length=100), default="")
     default = Column(Integer, default=1)
-    create_time = Column(String(length=50), default=date_time())
+    create_time = Column(String(length=50))
     province = Column(String(length=30), default="")
     city = Column(String(length=30), default="")
     area = Column(String(length=150), default="")
@@ -30,6 +30,7 @@ class Address(ModelBase):
     def __init__(self, user):
         self.user_id = user.user_id
         self.login_name = user.login_name
+        self.create_time = date_time()
 
     def to_json(self):
         return {

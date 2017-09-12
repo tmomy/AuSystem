@@ -10,7 +10,7 @@ from app.framework_api import route, build_ret, get_ret
 from app.services.api import SystemLoginService
 
 
-@route("/admin/login", api="后台管理系统登录", methods=['GET', 'POST'])
+@route("/admin/login", type=True, api="后台管理系统登录", methods=['GET', 'POST'])
 def admin_login():
     params = get_params()
     opr = params['opr']
@@ -24,6 +24,8 @@ def admin_login():
             response = make_response(resp)
             response.headers['authorization'] = result
             return response
+        else:
+            return get_ret(result)
     else:
         return build_ret(success=True, msg="该接口还未开放！", code=404)
 
@@ -43,7 +45,7 @@ def admin_logout():
         return build_ret(success=True, msg="该接口还未开放！", code=404)
 
 
-@route("/account/login", api="会员登录", methods=['GET', 'POST'])
+@route("/account/login", type=True, api="会员登录", methods=['GET', 'POST'])
 def account_login():
     params = get_params()
     opr = params['opr']
@@ -63,7 +65,7 @@ def account_login():
         return build_ret(success=True, msg="该接口还未开放！", code=404)
 
 
-@route("/account/sms/login", api="短信登录", methods=['GET', 'POST'])
+@route("/account/sms/login", type=True,  api="短信登录", methods=['GET', 'POST'])
 def account_login():
     params = get_params()
     opr = params['opr']
@@ -83,14 +85,14 @@ def account_login():
         return build_ret(success=True, msg="该接口还未开放！", code=404)
 
 
-@route("/account/sms", api="短信登录-短信验证码", methods=['GET', 'POST'])
+@route("/account/sms", type=True, api="短信登录-短信验证码", methods=['GET', 'POST'])
 def account_login():
     params = get_params()
     opr = params['opr']
     if opr == "add":
         data = params['data']
         account = data['account']
-        re_bool, result = SystemLoginService.sms_send_api(mobile=account)
+        re_bool, result = SystemLoginService.sms_send_api(account=account)
         if re_bool:
             resp = build_ret(success=True, msg="短信已发送！")
             return resp

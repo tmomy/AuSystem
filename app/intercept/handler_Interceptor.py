@@ -5,8 +5,10 @@
 @time: 2017/8/25 9:52
 """
 import json
+from sqlalchemy.orm import Session
+from app.services import engine
 from framework.flask import app
-from framework.decorators import rules
+from framework.decorators import rules, login_list
 from flask import request,make_response, g
 from app.untils.log_builder import build_log
 from app.conf.config import log, web
@@ -25,17 +27,14 @@ logging = build_log(log_config=log)
 @app.before_request
 def valid_account():
     token = request.headers.get('authorization')
-    if token is None:
+    if request.path in login_list:
         account_info = {
-            "type": 4
+            "type": 1
         }
-        msgs = msg.ERROR(403, "需要登录！")
-        resp = get_ret(msgs)
-        return make_response(resp, 403)
     else:
         account_info = de_token(token)
         if account_info is None:
-            msgs = msg.ERROR(403, "登录失效，请重新登录！")
+            msgs = msg.ERROR(1, "登录失效，请重新登录！")
             resp = get_ret(msgs)
             return make_response(resp, 403)
     setattr(g, "user_info", account_info)
@@ -50,21 +49,27 @@ def context_handler():
 def route_handler():
     user_info = get_user_info()
     redis_key = web['rule_redis_pix'] + str(user_info['type'])
-    rule_dict = json.loads(redis_service.get(redis_key))
-    if rule_dict is None:
+    rule_dict = redis_service.get(redis_key)
+    if rule_dict is None or not web['enable_rule']:
         pass
     else:
         params = get_params()
-        opr = params.get('opr')
-        if not opr:
-            for routes in rule_dict.values():
+        if isinstance(params, dict):
+            opr = params.get('opr')
+        else:
+            opr = None
+        rule_dicts = json.loads(rule_dict)
+        if request.path in login_list:
+            pass
+        elif not opr:
+            for routes in rule_dicts.values():
                 if request.path in routes:
-                    msgs = msg.ERROR(403, "权限受限！")
+                    msgs = msg.ERROR(1, "权限受限！")
                     resp = get_ret(msgs)
                     return make_response(resp, 403)
         else:
-            if request.path in rule_dict[opr]:
-                msgs = msg.ERROR(403, "权限受限！")
+            if request.path in rule_dicts[opr]:
+                msgs = msg.ERROR(1 , "权限受限！")
                 resp = get_ret(msgs)
                 return make_response(resp, 403)
 

@@ -28,7 +28,8 @@ def user_login(account, password):
     username = user.login_name
     user_id = user.user_id
     role_type = user.role_type
-    token = en_token(username, user_id,role_type)
+    role_name = user.role.name
+    token = en_token(username=username, user_id=user_id,role_type=role_type, role_name=role_name)
     handler_commit(session)
     return True, token
 
@@ -48,9 +49,19 @@ def sms_login(account, code):
     username = user.login_name
     user_id = user.user_id
     role_type = user.role_type
-    token = en_token(username, user_id,role_type)
+    role_name = user.role.name
+    token = en_token(username, user_id, role_type, role_name)
     handler_commit(session)
     return True, token
+
+
+@err_logging
+def sms_login_send(account):
+    user = session.query(User).filter(User.login_name == account).one_or_none()
+    if not user:
+        return False, msg.ERROR(1, "账号不存在！")
+    handler_commit(session)
+    return send_sms(account)
 
 
 @err_logging
@@ -91,7 +102,7 @@ def send_sms(mobile):
     __sms_code = generate_code()
     __param[R_SMS['template_string']] = __sms_code
     param = json.dumps(__param)
-    sms_response = send( mobile,param)
+    sms_response = send(mobile, param)
     if sms_response:
         set_code(__sms_code, mobile)
         return True, msg.SUCCESS

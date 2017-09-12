@@ -23,6 +23,7 @@ sys_logging = build_log(log)
 def handler_commit(fun):
     try:
         fun.commit()
+        fun.close()
         return True, msg.SUCCESS
     except:
         fun.rollback()

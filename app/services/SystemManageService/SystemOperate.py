@@ -19,14 +19,15 @@ session = Session(engine)
 def db_role_init():
     routes = _role_init()
     role_name = "admin"
-    session.add_all(routes)
-    handler_commit(session)
+    # session.add_all(routes)
+    # handler_commit(session)
     role = Role(role_name=role_name)
     administrator = Role(role_name="administrator")
     user = Role(role_name="user")
     tourists = Role(role_name="tourists")
     for route in routes:
         role.area_set.append(RoleRoute(route))
+        session.flush()
     session.add_all([role, administrator, user, tourists])
     return handler_commit(session)
 

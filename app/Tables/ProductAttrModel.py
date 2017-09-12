@@ -4,7 +4,7 @@
 @author: XX
 @time: 2017/8/30 14:48
 """
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String
 from sqlalchemy import ForeignKey
 from app.services import ModelBase
 
@@ -38,7 +38,7 @@ class AttrInfo(ModelBase):
     }
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    attr_id = Column(Integer, ForeignKey('attr_category.id', ondelete='CASCADE', onupdate='CASCADE'))
+    attr_id = Column(Integer, ForeignKey('attr_category.id', ondelete='CASCADE'))
     attr_value = Column(String(length=50))
 
     def __init__(self, attr_id, attr_value):
@@ -63,8 +63,8 @@ class SPUMapAttr(ModelBase):
     }
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    attr_id = Column(Integer, ForeignKey('attr_category.id', ondelete='CASCADE', onupdate='CASCADE'))
-    spu_id = Column(Integer, ForeignKey('spu.spu_id', ondelete='CASCADE', onupdate='CASCADE'))
+    attr_id = Column(Integer, ForeignKey('attr_category.id', ondelete='CASCADE'))
+    spu_id = Column(Integer, ForeignKey('spu.spu_id', ondelete='CASCADE'))
 
     def __init__(self, attr_id, spu_id):
         self.attr_id = attr_id

@@ -59,7 +59,7 @@ def task_add(data):
             if task_result.count() is not 0:
                 task_result_sum = sum([a.task_num for a in task_result_total])
                 last_task = datetime.datetime.strptime(str(task_result_total.order_by(Task.task_do_time.desc()).first().task_do_time),
-                                           "%Y-%m-%d %H:%M:%S")
+                                               "%Y-%m-%d %H:%M:%S")
                 add_day = last_task - local_date
                 # 剩余天数 - 已有任务task_num总和 - 最后一个任务和当前时间的差 + 已有任务数量 + 当天已存在任务的数量
                 free_day = rest_day - task_result_sum - add_day.days + task_result_total.count() + task_result.one().task_num
@@ -110,15 +110,17 @@ def task_add(data):
 
 # 查询任务
 
-def task_list(cond):
+def task_list(data):
     """
     :info
     @根据用户id和时间查询
     :request
-    @cond = {
-        'user_id': '',
-        'start_time': '2017-09-01',
-        'end_time': '2017-09-02',
+    @data = {
+        'cond':{
+            'user_id': '',
+            'start_time': '2017-09-01',
+            'end_time': '2017-09-02'
+        }
         'limit': 10,
         'page': 1
     }
@@ -126,12 +128,13 @@ def task_list(cond):
     @result=[]
     @sql_total=0
     """
+    cond = data['cond']
     sql_result = session.query(Task).filter(
         and_(
             Task.user_id.like('%' + cond['user_id'] + '%') if cond['user_id'] is not None else "",
             Task.task_do_time.between(cond['start_time'], cond['end_time']),
         ))
-    sql_content = sql_result.order_by(Task.task_do_time).limit(cond['limit']).offset((cond['page'] - 1) * cond['limit'])
+    sql_content = sql_result.order_by(Task.task_do_time).limit(data['limit']).offset((data['page'] - 1) * data['limit'])
     sql_total = sql_result.count()
     result = [i.to_json() for i in sql_content]
     return result, sql_total

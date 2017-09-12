@@ -6,6 +6,7 @@
 """
 from sqlalchemy.orm import Session
 from app.Tables.AdministratorModel import Administrator
+from app.Tables.RoleManage import Role
 from app.conf import msg
 from .. import engine, handler_commit, err_logging, field_update
 
@@ -15,6 +16,9 @@ session = Session(engine)
 # account, password, role_type=2, enable=0
 @err_logging
 def admin_add(account, password, role_type, enable):
+    role = session.query(Role).filter(Role.role_id == role_type).one_or_none()
+    if role is None:
+        return False, msg.ERROR(1, "角色类型不存在！")
     entry_admin = Administrator(account, password, role_type, enable)
     session.add(entry_admin)
     return handler_commit(session)
@@ -22,6 +26,9 @@ def admin_add(account, password, role_type, enable):
 
 @err_logging
 def admin_edit(admin_id, edit_info):
+    # role = session.query(Role).filter(Role.role_id == edit_info['role_type']).one_or_none()
+    # if role is None:
+    #     return False, msg.ERROR(1, "角色类型不存在！")
     search_admin = session.query(Administrator).filter(Administrator.id == admin_id).one_or_none()
     if not search_admin:
         return False, msg.ERROR(1, "用户不存在！")

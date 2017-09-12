@@ -14,13 +14,17 @@ session = Session(engine)
 
 # role add
 def db_role_add(role, enable):
+    if enable not in [0, 1]:
+        return False, msg.ERROR(1, "输入错误！")
     new_role = Role(role_name=role, enable=enable)
     session.add(new_role)
     return handler_commit(session)
 
 
 # role modify
-def db_role_modify(role_id,role_name,enable):
+def db_role_modify(role_id,role_name, enable):
+    if enable not in [0, 1]:
+        return False, msg.ERROR(1, "输入错误！")
     try:
         session.query(Role).filter(Role.role_id == role_id).\
             update({Role.name: role_name, Role.enable: enable}, synchronize_session=False)

@@ -10,18 +10,18 @@ from app.conf.config import web
 from app.framework_api import redis_service
 
 
-def en_token(username, user_id, role_type):
+def en_token(username, user_id, role_type, role_name):
     iat = time.time()
     exp = iat + web['session_timeout']
     payload = {
         'username': str(username),
         'user_id': str(user_id),
         'type': str(role_type),
+        'role_name': role_name,
         'iat': iat,
         'exp': exp
     }
     key_pix = generate_key()
-    print key_pix
     token = jwt.encode(payload, signer=jws.HmacSha(bits=256, key=web['token_key']+key_pix))
     redis_service.set(token, key_pix)
     return token
